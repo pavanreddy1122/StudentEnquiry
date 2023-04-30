@@ -19,6 +19,7 @@ import com.Web.StudentEnquiry.Binding.EnquiryForm;
 import com.Web.StudentEnquiry.Binding.EnquirySearchCriteria;
 import com.Web.StudentEnquiry.Entity.StudentEnqEntity;
 import com.Web.StudentEnquiry.Service.EnquiryService;
+import com.Web.StudentEnquiry.constants.AppConstants;
 
 @Controller
 public class EnquiryController {
@@ -34,35 +35,35 @@ public class EnquiryController {
 	public String logout()
 	{
 		session.invalidate();
-		return "index";
+		return AppConstants.INDEX;
 	}
 	
 	@GetMapping("/dashboard")
 	public String dashboard(Model model)
 	{
-		Integer id=(Integer) session.getAttribute("userId");
+		Integer id=(Integer) session.getAttribute(AppConstants.USER_ID);
 		DashboardResponse response=enquiryService.getDashboardData(id);
-		model.addAttribute("dashboard",response);
+		model.addAttribute(AppConstants.DASHBOARD,response);
 		
-		return "dashboard";
+		return AppConstants.DASHBOARD;
 	}
 
 	@GetMapping("/enquiry")
 	public String addEnquiryPage(Model model)
 	{
 		initForm(model);
-		return "add-enquiry";
+		return AppConstants.ADD_ENQUIRY;
 	}
 	
 	@PostMapping("/enquiry")
-	public String addEnquiry(@ModelAttribute("form")EnquiryForm form, Model model)
+	public String addEnquiry(@ModelAttribute(AppConstants.FORM)EnquiryForm form, Model model)
 	{
 		boolean status=false;
-		if(session.getAttribute("enqId")!=null)
+		if(session.getAttribute(AppConstants.ENQ_ID)!=null)
 		{
-			Integer enqId=(int)session.getAttribute("enqId");
+			Integer enqId=(int)session.getAttribute(AppConstants.ENQ_ID);
 			status=enquiryService.update(enqId,form);
-			session.removeAttribute("enqId");
+			session.removeAttribute(AppConstants.ENQ_ID);
 		}
 		else
 		{
@@ -71,13 +72,13 @@ public class EnquiryController {
 		
 		if(status)
 		{
-			model.addAttribute("success","Enquiry added");
+			model.addAttribute(AppConstants.SUCCESS,"Enquiry added");
 		}
 		else
 		{
-			model.addAttribute("error","Problem occured");
+			model.addAttribute(AppConstants.ERROR,"Problem occured");
 		}
-	return "add-enquiry";
+		return AppConstants.ADD_ENQUIRY;
 	}
 	
 	@GetMapping("/enquires")
@@ -85,8 +86,8 @@ public class EnquiryController {
 	{
 		initForm(model);
 		List<StudentEnqEntity> stu=enquiryService.getEnquries();
-		model.addAttribute("enquiries", stu);
-		return "view-enquiries";
+		model.addAttribute(AppConstants.ENQUIRIES, stu);
+		return AppConstants.VIEW_ENQUIRIES;
 	}
 	
 
@@ -99,10 +100,10 @@ public class EnquiryController {
 		enq.setCourseName(cname);
 		enq.setEnquiryStatus(status);
 		System.out.println(enq);
-		Integer id=(Integer) session.getAttribute("userId");
+		Integer id=(Integer) session.getAttribute(AppConstants.USER_ID);
 		List<StudentEnqEntity> stu=enquiryService.getFilteredEnqs(enq, id);
-		model.addAttribute("enquiries", stu);
-		return "filter-enq";
+		model.addAttribute(AppConstants.ENQUIRIES, stu);
+		return AppConstants.FILTER_ENQUIRIES;
 	}
 	
 	private void initForm(Model model)
@@ -110,9 +111,9 @@ public class EnquiryController {
 		List<String> courses=enquiryService.getCourseName();
 		List<String> enqStatus=enquiryService.getEnquryStatus();
 		EnquiryForm form=new EnquiryForm();
-		model.addAttribute("form",form );
-		model.addAttribute("courses",courses);
-		model.addAttribute("enqStatus",enqStatus);
+		model.addAttribute(AppConstants.FORM,form );
+		model.addAttribute(AppConstants.COURSES,courses);
+		model.addAttribute(AppConstants.STATUS,enqStatus);
 	}
 	
 	@GetMapping("/edit")
@@ -131,13 +132,13 @@ public class EnquiryController {
 			BeanUtils.copyProperties(stu, form);
 			
 			//set data in model object
-			model.addAttribute("courses",courseNames );
-			model.addAttribute("enqStatus",enqStatus );
-			model.addAttribute("form",form );
-			session.setAttribute("enqId",stu.getEnquiryId());
+			model.addAttribute(AppConstants.COURSES,courseNames );
+			model.addAttribute(AppConstants.STATUS,enqStatus );
+			model.addAttribute(AppConstants.FORM,form );
+			session.setAttribute(AppConstants.ENQ_ID,stu.getEnquiryId());
 			
 		}
-		return "add-enquiry";
+		return AppConstants.ADD_ENQUIRY;
 	}
 	
 }
