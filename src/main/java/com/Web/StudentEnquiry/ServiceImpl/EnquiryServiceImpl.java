@@ -144,4 +144,38 @@ public class EnquiryServiceImpl implements EnquiryService{
 		return null;
 	}
 
+	
+
+	@Override
+	public StudentEnqEntity getEnq(int enqId) {
+		
+		
+		return studentEnqRepo.findById(enqId).get();
+	}
+
+	@Override
+	public boolean update(Integer enqId, EnquiryForm form) {
+		StudentEnqEntity stu=getEnq(enqId);
+		if(stu==null)
+		{
+		return false;
+		}
+		stu.setCourseName(form.getCourseName());
+		stu.setClassMode(form.getClassMode());
+		stu.setEnquiryStatus(form.getEnquiryStatus());
+		stu.setPhoNumber(form.getPhoNumber());
+		stu.setStudentName(form.getStudentName());
+		studentEnqRepo.save(stu);
+		return true;
+		
+		
+		
+	}
+
+	@Override
+	public String editEnquiry(int id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

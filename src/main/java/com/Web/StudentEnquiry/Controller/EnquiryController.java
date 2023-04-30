@@ -4,11 +4,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -48,20 +50,25 @@ public class EnquiryController {
 	@GetMapping("/enquiry")
 	public String addEnquiryPage(Model model)
 	{
-		List<String> course= enquiryService.getCourseName();
-		List<String> enq= enquiryService.getEnquryStatus();
-		EnquiryForm enqForm=new EnquiryForm();
-		model.addAttribute("form",enqForm);
-		model.addAttribute("course",course);
-		model.addAttribute("enq", enq);
+		initForm(model);
 		return "add-enquiry";
 	}
 	
 	@PostMapping("/enquiry")
 	public String addEnquiry(@ModelAttribute("form")EnquiryForm form, Model model)
 	{
+		boolean status=false;
+		if(session.getAttribute("enqId")!=null)
+		{
+			Integer enqId=(int)session.getAttribute("enqId");
+			status=enquiryService.update(enqId,form);
+			session.removeAttribute("enqId");
+		}
+		else
+		{
+			status=enquiryService.saveEnquiry(form);
+		}
 		
-		boolean status=enquiryService.saveEnquiry(form);
 		if(status)
 		{
 			model.addAttribute("success","Enquiry added");
@@ -82,6 +89,7 @@ public class EnquiryController {
 		return "view-enquiries";
 	}
 	
+
 	@GetMapping("/filtered-enquires")
 	public String getFilteredEnq(@RequestParam String cname, @RequestParam String status,@RequestParam String mode,Model model)
 	{
@@ -102,10 +110,34 @@ public class EnquiryController {
 		List<String> courses=enquiryService.getCourseName();
 		List<String> enqStatus=enquiryService.getEnquryStatus();
 		EnquiryForm form=new EnquiryForm();
-		
+		model.addAttribute("form",form );
 		model.addAttribute("courses",courses);
-		model.addAttribute("form", form);
 		model.addAttribute("enqStatus",enqStatus);
+	}
+	
+	@GetMapping("/edit")
+	public String editEnquiresPage(@RequestParam("enquiryId") Integer enquiryId,  Model model)
+	{
+		StudentEnqEntity stu=enquiryService.getEnq(enquiryId);
+		if(stu!=null)
+		{
+			List<String> courseNames =enquiryService.getCourseName();
+			//List<String> courseNames =enquiryService.getCourseName();
+			//get enq status for drop down
+			List<String> enqStatus = enquiryService.getEnquryStatus();
+			//create binding class object
+			EnquiryForm form=new EnquiryForm();
+			
+			BeanUtils.copyProperties(stu, form);
+			
+			//set data in model object
+			model.addAttribute("courses",courseNames );
+			model.addAttribute("enqStatus",enqStatus );
+			model.addAttribute("form",form );
+			session.setAttribute("enqId",stu.getEnquiryId());
+			
+		}
+		return "add-enquiry";
 	}
 	
 }

@@ -45,7 +45,7 @@
 				<td th:text="${enq.enquiryStatus}"></td>
 				<td th:text="${enq.classMode}"></td>
 
-				<td><a href="enquiry" class="btn btn-primary">Edit</a></td>
+				<td><a th:href="@{/edit?(enquiryId=${enq.enquiryId})}" class="btn btn-primary">Edit</a></td>
 			</tr>
 
 		</tbody>
